@@ -1,0 +1,2 @@
+<div class="card-header"><h5>Grafik Nilai Eigen Kriteria dan Hasil</h5></div>
+<div class="card-body"><iframe width="100%" height="500px" src="grafik_1.php" frameborder="0" scrolling="auto"></iframe></div>
