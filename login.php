@@ -100,7 +100,7 @@ if(@$_POST['btn_login']) {
                                     </div>
                                 </div>
                                 <hr/>
-                                <div class="row">
+<!--                                <div class="row">
                                     <div class="col-md-12">
                                         <p class="text-inverse text-left m-b-0">Belum punya akun?</p>
                                         <p class="text-inverse text-left"><b><a href="?h=pengguna-input&stat=tambah">
@@ -108,8 +108,7 @@ if(@$_POST['btn_login']) {
                                         Daftar</button>
                                     </a></b></p>
                                     </div>
-                                </div>
-
+                                </div>-->
                             </div>
                         </form>
                         <!-- end of form -->
