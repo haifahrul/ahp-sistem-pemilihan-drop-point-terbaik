@@ -1,4 +1,6 @@
 <?php
+require_once 'ahp_aturan.php';
+
 $seleksi = !empty(antiinjec(@$_POST['seleksi'])) ? antiinjec(@$_POST['seleksi']) : !empty($_POST['seleksi']) ? $_POST['seleksi'] : NULL;
 $kriteria = !empty(antiinjec(@$_POST['kriteria'])) ? antiinjec(@$_POST['kriteria']) : !empty($_POST['kriteria']) ? $_POST['kriteria'] : NULL;
 
@@ -11,42 +13,18 @@ if (!empty($seleksi)) {
     $kriteriaSeleksiAfterSave = querydb($kriteriaSeleksiQuery);
     $kriteriaSeleksiCount = $kriteriaSeleksi->num_rows;
 
-    $dataAlternatif = $q_seleksi = "SELECT * FROM ahp_alternatif WHERE id_seleksi = " . $seleksi;
-    $dataAlternatif = querydb($dataAlternatif);
+    $dataAlternatifQuery = $q_seleksi = "SELECT * FROM ahp_alternatif WHERE id_seleksi = " . $seleksi;
+    $dataAlternatif = querydb($dataAlternatifQuery);
     $dataAlternatifCount = $dataAlternatif->num_rows;
 
-    /* HITUNG PERBANDINGAN */
-    $getAlternatif = $q_seleksi = "SELECT aa.id_seleksi, ak.id_kriteria, aa.id_alternatif, ak.value, aa.nama_alternatif FROM ahp_alternatif aa LEFT JOIN ahp_kandidat ak ON ak.id_alternatif = aa.id_alternatif WHERE aa.id_seleksi = " . $seleksi;
-    $getAlternatif = querydb($getAlternatif);
+    $getAlternatifQuery = $q_seleksi = "SELECT aa.id_seleksi, ak.id_kriteria, aa.id_alternatif, ak.value, aa.nama_alternatif FROM ahp_alternatif aa LEFT JOIN ahp_kandidat ak ON ak.id_alternatif = aa.id_alternatif WHERE aa.id_seleksi = " . $seleksi;
+    $getAlternatif = querydb($getAlternatifQuery);
     $getAlternatifCount = $getAlternatif->num_rows;
-//    var_dump(mysqli_fetch_all($getAlternatif));
-    $kandidat = [];
-    foreach ($dataAlternatif as $i => $val) {
-//        var_dump($val);
-        foreach ($kriteriaSeleksi as $j => $val2) {
-//            if ($val['id_alternatif'] != $val2['id_alternatif']) {
-//                var_dump($val2);
-////                $valueIdAlternatif_P = $val['id_alternatif'];
-////                $q_sql_cek_kandidatInput = "SELECT * FROM ahp_kandidat WHERE id_seleksi='$seleksi' AND id_kriteria='$valueIdKriteria' AND id_alternatif='$valueIdAlternatifInput'";
-////                $q_sql_cek_kandidatInput = querydb($q_sql_cek_kandidatInput);
-////                $q_sql_cek_kandidatInput = mysqli_fetch_row($q_sql_cek_kandidatInput);
-//
-//                $kandidat[] = $val['value'] - $val2['value'];
-////                continue;
-//            } else {
-//                $kandidat[] = $val['value'] - $val2['value'];
-//            }
-        }
-    }
-//    exit(var_dump($kandidat));
-    /* END HITUNG PERBANDINGAN */
-
-
 
     if (!empty($seleksi)) {
         $d_kriteria = mysqli_fetch_array(querydb("SELECT a.id_kriteria_seleksi FROM ahp_kriteria_seleksi as a, ahp_kriteria as b WHERE a.id_kriteria=b.id_kriteria AND a.id_seleksi='$seleksi' ORDER BY a.id_kriteria_seleksi ASC LIMIT 0, 1"));
-//        $kriteria = $d_kriteria['id_kriteria_seleksi'];
-//Buat alternatif berpasangan
+
+        /* Buat alternatif berpasangan */
         $q_kriteria1 = "SELECT a.id_kriteria_seleksi FROM ahp_kriteria_seleksi as a, ahp_kriteria as b WHERE a.id_kriteria=b.id_kriteria AND a.id_seleksi='$seleksi' ORDER BY a.id_kriteria_seleksi ASC";
         $h_kriteria1 = querydb($q_kriteria1);
         while ($d_kriteria1 = mysqli_fetch_array($h_kriteria1)) {
@@ -80,12 +58,9 @@ if (!empty($seleksi)) {
         if (@$_POST['status'] == "save") {
             $dataPost = $_POST;
 
-            foreach ($kriteriaSeleksiAfterSave as $valks) {
-                // Simpan Nilai yang dipilih
-//                $kriteria = antiinjec(@$_POST['kriteria']);
+            foreach ($kriteriaSeleksiAfterSave as $key => $valks) {
                 $kriteriaID = $valks['id_kriteria_seleksi'];
                 $id_nilai_pasangan = @$_POST['id_nilai_pasangan'];
-//                var_dump($kriteriaID);
 
                 /* SIMPAN NILAI DARI INPUT ALTERNATIF KE DATABASE */
                 foreach ($dataAlternatif as $val) {
@@ -95,9 +70,9 @@ if (!empty($seleksi)) {
                         $valueInputAlternatifKriteria = $valueIdAlternatifInput . '-' . $valueIdKriteriaInput;
                         $valueInput = !empty($dataPost[$valueInputAlternatifKriteria]) ? $dataPost[$valueInputAlternatifKriteria] : 0;
 
-                        $q_sql_cek_kandidatInput = "SELECT * FROM ahp_kandidat WHERE id_seleksi='$seleksi' AND id_kriteria='$valueIdKriteriaInput' AND id_alternatif='$valueIdAlternatifInput'";
-                        $q_sql_cek_kandidatInput = querydb($q_sql_cek_kandidatInput);
-                        $q_sql_cek_kandidatInput = mysqli_fetch_row($q_sql_cek_kandidatInput);
+                        $q_sql_cek_kandidatInputQuery = "SELECT * FROM ahp_kandidat WHERE id_seleksi='$seleksi' AND id_kriteria='$valueIdKriteriaInput' AND id_alternatif='$valueIdAlternatifInput'";
+                        $q_sql_cek_kandidatInputQueryDb = querydb($q_sql_cek_kandidatInputQuery);
+                        $q_sql_cek_kandidatInput = mysqli_fetch_row($q_sql_cek_kandidatInputQueryDb);
 
                         if (empty($q_sql_cek_kandidatInput)) {
                             $query = "INSERT INTO ahp_kandidat (id_seleksi, id_kriteria, id_alternatif, value)
@@ -116,23 +91,31 @@ if (!empty($seleksi)) {
 
                 $alternatifSelisih1 = [];
                 $alternatifSelisih2 = [];
-
-//                var_dump($valks);
-//                exit(var_dump(mysqli_fetch_all($h_tampil)));
-
                 $loop = 0;
                 while ($r = mysqli_fetch_array($h_tampil)) {
-                    $getIdKriteria = "SELECT aks.id_kriteria FROM ahp_kriteria_seleksi aks WHERE aks.id_kriteria_seleksi='$r[id_node_0]'";
-                    $getIdKriteria = querydb($getIdKriteria);
-                    $getIdKriteria = mysqli_fetch_assoc($getIdKriteria);
+                    $getIdKriteriaQuery = "SELECT aks.id_kriteria, ak.is_konversi FROM ahp_kriteria_seleksi aks JOIN ahp_kriteria ak ON ak.id_kriteria=aks.id_kriteria WHERE aks.id_kriteria_seleksi='$r[id_node_0]'";
+                    $getIdKriteriaQueryDb = querydb($getIdKriteriaQuery);
+                    $dataKriteria = mysqli_fetch_assoc($getIdKriteriaQueryDb);
+                    $getIdKriteria = $dataKriteria['id_kriteria'];
+                    $getIsKonversi = $dataKriteria['is_konversi'];
 
-                    $getDataKandidat = "SELECT ak.value FROM ahp_kandidat ak WHERE ak.id_kriteria='$getIdKriteria[id_kriteria]' AND ak.id_alternatif='$r[id_node_1]'";
-                    $getDataKandidat = querydb($getDataKandidat);
-                    $getDataKandidat = mysqli_fetch_row($getDataKandidat);
+                    $getDataKandidatQuery = "SELECT ak.value FROM ahp_kandidat ak WHERE ak.id_kriteria='$getIdKriteria' AND ak.id_alternatif='$r[id_node_1]'";
+                    $getDataKandidatQueryDb = querydb($getDataKandidatQuery);
+                    $getDataKandidat = mysqli_fetch_row($getDataKandidatQueryDb);
 
-                    $getDataKandidat2 = "SELECT ak.value FROM ahp_kandidat ak WHERE ak.id_kriteria='$getIdKriteria[id_kriteria]' AND ak.id_alternatif='$r[id_node_2]'";
-                    $getDataKandidat2 = querydb($getDataKandidat2);
-                    $getDataKandidat2 = mysqli_fetch_row($getDataKandidat2);
+                    $getDataKandidat2Query = "SELECT ak.value FROM ahp_kandidat ak WHERE ak.id_kriteria='$getIdKriteria' AND ak.id_alternatif='$r[id_node_2]'";
+                    $getDataKandidat2QueryDb = querydb($getDataKandidat2Query);
+                    $getDataKandidat2 = mysqli_fetch_row($getDataKandidat2QueryDb);
+
+//                    var_dump($getDataKandidat[0] .' - '. $getDataKandidat2[0]);
+                    $IS_KONVERSI_YA = 2; // 2 adalah status konversi YA
+                    if ($getIsKonversi == $IS_KONVERSI_YA) {
+                        $getDataKandidat = ahp_aturan::denda($seleksi, $getIdKriteria, $getDataKandidat[0]);
+                        $getDataKandidat2 = ahp_aturan::denda($seleksi, $getIdKriteria, $getDataKandidat2[0]);
+                    }
+
+//                    var_dump($getDataKandidat[0] .' - '. $getDataKandidat2[0]);
+//                    exit(var_dump($getDataKandidat2));
 
                     $resultAlternatifSelisih1 = $getDataKandidat[0] - $getDataKandidat2[0];
                     $alternatifSelisih1['skala_selisih'][] = number_format($resultAlternatifSelisih1, 2);
@@ -148,7 +131,7 @@ if (!empty($seleksi)) {
 
                 $dataArrayAlternatifSelisih = array_merge($alternatifSelisih1['skala_selisih'], $alternatifSelisih2['skala_selisih']);
 //            var_dump($alternatifIdPasangan);
-//            var_dump($dataArrayAlternatifSelisih);
+                var_dump($dataArrayAlternatifSelisih);
 //            var_dump(max($dataArrayAlternatifSelisih));
 //            var_dump(min($dataArrayAlternatifSelisih));
 
@@ -449,9 +432,9 @@ if (!empty($seleksi)) {
                                         $valueInput = $valueIdAlternatif . '-' . $valueIdKriteria;
 
                                         if (empty($_POST[$valueInput])) {
-                                            $q_sql_value_kandidat = "SELECT * FROM ahp_kandidat WHERE id_seleksi='$seleksi' AND id_kriteria='$valueIdKriteria' AND id_alternatif='$valueIdAlternatif'";
-                                            $q_sql_value_kandidat = querydb($q_sql_value_kandidat);
-                                            $q_sql_value_kandidat = mysqli_fetch_row($q_sql_value_kandidat);
+                                            $q_sql_value_kandidatQuery = "SELECT * FROM ahp_kandidat WHERE id_seleksi='$seleksi' AND id_kriteria='$valueIdKriteria' AND id_alternatif='$valueIdAlternatif'";
+                                            $q_sql_value_kandidatQueryDb = querydb($q_sql_value_kandidatQuery);
+                                            $q_sql_value_kandidat = mysqli_fetch_row($q_sql_value_kandidatQueryDb);
                                         }
 
                                         ?>
@@ -551,14 +534,12 @@ if (!empty($seleksi)) {
                     $h_tampil = querydb($tampil);
                     $no = 1;
 
-//                var_dump(mysqli_fetch_all($h_tampil));
-
                     while ($r = mysqli_fetch_array($h_tampil)) {
                         //$harga=format_rupiah($r['harga']);
                         $tampil2 = "SELECT a.id_alternatif, a.nama_alternatif FROM ahp_alternatif as a, ahp_nilai_pasangan as c WHERE c.tipe=1 AND c.id_node_0='$kriteria' AND a.id_alternatif=c.id_node_2 AND c.id_node_1='$r[id_node_1]' AND c.id_nilai_pasangan='$r[id_nilai_pasangan]' AND a.id_seleksi='$seleksi' ORDER BY a.id_alternatif ASC";
                         $h_tampil2 = querydb($tampil2);
                         $r2 = mysqli_fetch_array($h_tampil2);
-//                    var_dump($r2);
+
                         $id_alternatif = 1;
                         $queryNilaiKandidat = "SELECT * FROM ahp_kandidat WHERE id_seleksi='$seleksi' AND id_kriteria='$kriteria' AND id_alternatif='$id_alternatif'";
 
