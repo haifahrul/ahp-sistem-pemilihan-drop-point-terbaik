@@ -10,6 +10,7 @@
                         <th>No</th>
                         <th>Kriteria</th>
                         <th>Keterangan</th>
+                        <th>Apakah Butuh Nilai Konversi?</th>
                         <th class="text-center">
                             <a href="?h=kriteria-input&stat=tambah" class="btn btn-primary btn-sm btn-round" style="width:98px;">Tambah</a>
                         </th>
@@ -18,7 +19,7 @@
                 <tbody>
                     <?php
                     $no = 0;
-                    $hquery = querydb("SELECT id_kriteria, kriteria, keterangan FROM ahp_kriteria ORDER BY id_kriteria ASC");
+                    $hquery = querydb("SELECT id_kriteria, kriteria, keterangan, is_konversi FROM ahp_kriteria ORDER BY id_kriteria ASC");
                     while ($data = mysqli_fetch_array($hquery)) {
                         $no++;
 
@@ -27,6 +28,7 @@
                             <td><?php echo $no; ?></td>
                             <td><?php echo $data['kriteria']; ?></td>
                             <td><?php echo $data['keterangan']; ?></td>
+                            <td><?php echo $data['is_konversi'] == 1 ? 'Tidak' : 'Ya'; ?></td>
                             <td width="12%" style="text-align:center;">
                                 <script type="text/javascript">
                                     function konfirmasi<?php echo $data[0]; ?>() {

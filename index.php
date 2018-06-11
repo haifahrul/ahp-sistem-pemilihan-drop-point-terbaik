@@ -54,11 +54,11 @@ $h = antiinjec(@$_GET['h']);
             </a>
         </div>-->
         <!-- Pre-loader start -->
-        <div class="theme-loader">
+<!--        <div class="theme-loader">
             <div class="loader-track">
                 <div class="loader-bar"></div>
             </div>
-        </div>
+        </div>-->
         <!-- Pre-loader end -->
         <div id="pcoded" class="pcoded">
             <div class="pcoded-overlay-box"></div>

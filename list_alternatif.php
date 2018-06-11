@@ -22,11 +22,11 @@ $seleksi = antiinjec(@$_GET['seleksi']);
 $stat = @$_GET['stat'];
 $id = antiinjec(@$_GET['id']);
 
-if ($stat == "hapus" && $id != "") {
+if ($stat == "hapus" && !empty($id)) {
     $check = querydb("SELECT * FROM ahp_alternatif WHERE id_alternatif='$id'");
 
     if (!empty($check->num_rows)) {
-        querydb("DELETE FROM ahp_kriteria_seleksi WHERE id_kriteria_seleksi='$id'");
+        querydb("DELETE FROM ahp_alternatif WHERE id_alternatif='$id'");
 
         ?>
         <script language="JavaScript">
@@ -99,7 +99,8 @@ if ($stat == "hapus" && $id != "") {
                             <td><?php echo date("d/m/Y", strtotime($data['tgl_daftar'])); ?></td>
                             <td style="text-align:center;">
                                 <a href="?h=alternatif-input&stat=ubah&seleksi=<?php echo $seleksi ?>&id=<?php echo $data['id_alternatif']; ?>" class="btn btn-success btn-sm btn-round">Ubah</a>
-                                <a href="#" class="btn btn-danger btn-sm btn-round" onclick="konfirmasi<?php echo $data[0]; ?>()">Hapus</a>
+                                <!--<a href="#" class="btn btn-danger btn-sm btn-round" onclick="konfirmasi<?php echo $data[0]; ?>()">Hapus</a>-->
+                                <a href="#" class="btn btn-danger btn-sm btn-round" onclick="konfirmasi(<?php echo $data[0] ?>, '<?php echo $seleksi ?>', '<?php echo $data['nama_alternatif'] ?>')">Hapus</a>
                             </td>
                         </tr>
                     <?php } if (@$_GET['con'] != "" && !empty($_GET['seleksi'])) { ?>
@@ -136,10 +137,10 @@ if ($stat == "hapus" && $id != "") {
 </div>
 
 <script type="text/javascript">
-    function konfirmasi<?php echo $data[0]; ?>() {
-        var answer = confirm("Anda yakin akan menghapus data (<?php echo $data['nama']; ?>) ini ?")
+    function konfirmasi(id, seleksi, nama) {
+        var answer = confirm("Anda yakin akan menghapus data " + nama + " ?")
         if (answer) {
-            window.location = "?h=alternatif-input&seleksi=<?php echo $seleksi ?>&stat=hapus&id=<?php echo"$data[0]"; ?>";
+            window.location = "?h=alternatif&seleksi=" + seleksi + "&stat=hapus&id=" + id;
         }
     }
 </script>

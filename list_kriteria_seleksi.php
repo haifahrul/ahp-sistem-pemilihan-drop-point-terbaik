@@ -27,6 +27,8 @@ if ($stat == "hapus" && $id != "") {
 
     if (!empty($check->num_rows)) {
         querydb("DELETE FROM ahp_kriteria_seleksi WHERE id_kriteria_seleksi='$id'");
+        querydb("DELETE FROM ahp_nilai_eigen WHERE id_node IN ('$id')");
+        querydb("DELETE FROM ahp_nilai_pasangan WHERE id_node_2 IN ('$id')");
 
         ?>
         <script language="JavaScript">
@@ -93,7 +95,7 @@ if ($stat == "hapus" && $id != "") {
                             <td><?php echo $no; ?></td>
                             <td><?php echo $data['kriteria']; ?></td>
                             <td style="text-align:center;">
-                                <a href="?h=kriteria-seleksi&seleksi=<?php echo $seleksi ?>&stat=hapus&id=<?php echo $data[0] ?>" class="btn btn-danger btn-sm btn-round" onclick="konfirmasi(<?php echo $data[0] ?>, '<?php echo $data['kriteria'] ?>', '<?php echo $seleksi ?>')">Hapus</a>
+                                <a href="#" class="btn btn-danger btn-sm btn-round" onclick="konfirmasi(<?php echo $data[0] ?>, '<?php echo $data['kriteria'] ?>', '<?php echo $seleksi ?>')">Hapus</a>
 
                             </td>
                         </tr>
@@ -133,8 +135,8 @@ if ($stat == "hapus" && $id != "") {
 <script type="text/javascript">
     function konfirmasi(id, kriteria, seleksi) {
         var answer = confirm("Anda yakin akan menghapus data " + kriteria + " ini ?");
-//        if (answer) {
-//            window.location = "?h=kriteria-seleksi&seleksi=" + seleksi;
-//        }
+        if (answer) {
+            window.location = "?h=kriteria-seleksi&seleksi=" + seleksi + "&stat=hapus&id=" + id;
+        }
     }
 </script>

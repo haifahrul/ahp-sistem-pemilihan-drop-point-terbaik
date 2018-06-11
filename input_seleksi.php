@@ -88,7 +88,7 @@ if (@$_POST['stat_simpan']) {
             <div class="form-group row">
                 <label class="col-sm-2 col-form-label">Catatan</label>
                 <div class="col-sm-10 validate">
-                    <textarea class="form-control" required name="catatan" rows="5"><?php echo!empty($data['catatan']) ? $data['catatan'] : null ?></textarea>
+                    <textarea class="form-control" name="catatan" rows="5"><?php echo!empty($data['catatan']) ? $data['catatan'] : null ?></textarea>
                 </div>
             </div>
             <button id='send' type='submit' name="btn_simpan" class="btn btn-primary btn-sm btn-round">Simpan Data</button>

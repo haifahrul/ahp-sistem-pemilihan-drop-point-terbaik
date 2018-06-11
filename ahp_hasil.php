@@ -48,32 +48,34 @@ while ($d_hasil_rank = mysqli_fetch_array($hasil_rank)) {
 <div class="card" >
     <div class="card-header"><h5>4-3. Hasil Seleksi Metode AHP</h5></div>
     <form class="card-body" method="post" action="?h=hasil" enctype="multipart/form-data">
-        <table class="table" width="100%" border="0" cellspacing="0" cellpadding="4">
-            <tr>
-                <td width="13%" style="text-align:left;">Pilih Seleksi :</td>
-                <td width="87%" style="text-align:left;">
-                    <select name="seleksi" onchange="this.form.submit()" style="font-size:16px; color:#333; padding-top:2px; width:auto;">
-                        <?php
-                        $q_seleksi = "SELECT id_seleksi, seleksi, tahun FROM ahp_seleksi ORDER BY tahun DESC, id_seleksi DESC";
-                        $h_node = querydb($q_seleksi);
-                        while ($dseleksi = mysqli_fetch_array($h_node)) {
+        <div class="table-responsive">
+            <table class="table" width="100%" border="0" cellspacing="0" cellpadding="4">
+                <tr>
+                    <td width="13%" style="text-align:left;">Pilih Seleksi :</td>
+                    <td width="87%" style="text-align:left;">
+                        <select name="seleksi" onchange="this.form.submit()" style="font-size:16px; color:#333; padding-top:2px; width:auto;">
+                            <?php
+                            $q_seleksi = "SELECT id_seleksi, seleksi, tahun FROM ahp_seleksi ORDER BY tahun DESC, id_seleksi DESC";
+                            $h_node = querydb($q_seleksi);
+                            while ($dseleksi = mysqli_fetch_array($h_node)) {
 
-                            ?>
-                            <option value="<?php echo $dseleksi['id_seleksi']; ?>" <?php
-                            if ($dseleksi['id_seleksi'] == $seleksi) {
-                                echo "selected";
-                            }
+                                ?>
+                                <option value="<?php echo $dseleksi['id_seleksi']; ?>" <?php
+                                if ($dseleksi['id_seleksi'] == $seleksi) {
+                                    echo "selected";
+                                }
 
-                            ?>><?php echo $dseleksi['tahun'] . " - " . $dseleksi['seleksi']; ?></option>
-                                <?php } ?>
-                    </select>
-                </td>
-            </tr>
-        </table>
+                                ?>><?php echo $dseleksi['tahun'] . " - " . $dseleksi['seleksi']; ?></option>
+                                    <?php } ?>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+        </div>
     </form>
 
     <div class="card-body csstable">
-        |&nbsp;
+        <!--|&nbsp;-->
         <?php
         if ($seleksi != "") {
             $j = 1;
@@ -86,77 +88,79 @@ while ($d_hasil_rank = mysqli_fetch_array($hasil_rank)) {
             }
 
             ?>
-            <table class="table" width="100%" border="0" cellspacing="0" cellpadding="4">
-                <?php
-                $h_kriteria = querydb("SELECT a.id_kriteria_seleksi, nilai FROM ahp_kriteria_seleksi as a, ahp_kriteria as b, ahp_nilai_eigen as c
+            <div class="table-responsive">
+                <table class="table" width="100%" border="0" cellspacing="0" cellpadding="4">
+                    <?php
+                    $h_kriteria = querydb("SELECT a.id_kriteria_seleksi, nilai FROM ahp_kriteria_seleksi as a, ahp_kriteria as b, ahp_nilai_eigen as c
 						 WHERE a.id_kriteria=b.id_kriteria AND c.id_node_0=0 AND c.id_node=a.id_kriteria_seleksi
   							AND a.id_seleksi='$seleksi' ORDER BY a.id_kriteria_seleksi ASC");
-                $jml_kriteria = mysqli_num_rows($h_kriteria);
-
-                ?>
-                <tr>
-                    <td width='5%'>No.</td>
-                    <td><?php echo $kasus_objek; ?></td>
-                    <?php
-                    for ($i = 1; $i <= $jml_kriteria; $i++) {
-
-                        ?>
-                        <td><?php echo sprintf("K%02d", $i); ?></td>
-                    <?php } ?>
-                    <td style="font-weight:bold; color:#F60;">Nilai</td>
-                    <td style="font-weight:bold; color:#390; text-align:center;">Rank</td>
-                </tr>
-                <tr>
-                    <td style="font-weight:bold; color:#039;">&nbsp;</td>
-                    <td style="font-weight:bold; color:#039;">Eigen Kriteria</td>
-                    <?php
-                    while ($d_kriteria = mysqli_fetch_array($h_kriteria)) {
-
-                        ?>
-                        <td style="font-weight:bold; color:#039;"><?php echo number_format($d_kriteria['nilai'], 3, ',', '.'); ?></td>
-                    <?php } ?>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <?php
-                $tampil = "SELECT a.id_alternatif, a.nama_alternatif, b.nilai, b.rank 
-              FROM ahp_alternatif as a, ahp_nilai_hasil as b
-              WHERE a.id_alternatif=b.id_alternatif AND a.id_seleksi='$seleksi' 
-			  ORDER BY a.id_alternatif ASC";
-                $h_tampil = querydb($tampil);
-                $no = 1;
-                while ($r = mysqli_fetch_array($h_tampil)) {
-                    $n_alternatif = sprintf("A%03d", $no);
+                    $jml_kriteria = mysqli_num_rows($h_kriteria);
 
                     ?>
                     <tr>
-                        <td><?php echo $no; ?></td>
-                        <td><?php echo $n_alternatif . ' - ' . $r['nama_alternatif']; ?></td>
+                        <td width='5%'>No.</td>
+                        <td><?php echo $kasus_objek; ?></td>
                         <?php
-                        $nilai_akhir = 0;
-                        $h_kriteria = querydb("SELECT a.id_kriteria_seleksi, c.nilai FROM ahp_kriteria_seleksi as a, ahp_kriteria as b, ahp_nilai_eigen as c
-							   WHERE a.id_kriteria=b.id_kriteria AND c.id_node_0=0 AND c.id_node=a.id_kriteria_seleksi
-								   AND a.id_seleksi='$seleksi' ORDER BY a.id_kriteria_seleksi ASC");
-                        while ($d_kriteria = mysqli_fetch_array($h_kriteria)) {
-                            //Ambil Nilai Hasil Alternatif
-                            $h_nilai = querydb("SELECT nilai FROM ahp_nilai_eigen WHERE id_node_0='$d_kriteria[id_kriteria_seleksi]' AND id_node='$r[id_alternatif]'");
-                            $d_nilai = mysqli_fetch_array($h_nilai);
+                        for ($i = 1; $i <= $jml_kriteria; $i++) {
 
                             ?>
-                            <td><?php echo number_format($d_nilai['nilai'], 3, ',', '.'); ?></td>
-                            <?php
-                        }
+                            <td><?php echo sprintf("K%02d", $i); ?></td>
+                        <?php } ?>
+                        <td style="font-weight:bold; color:#F60;">Nilai</td>
+                        <td style="font-weight:bold; color:#390; text-align:center;">Rank</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight:bold; color:#039;">&nbsp;</td>
+                        <td style="font-weight:bold; color:#039;">Eigen Kriteria</td>
+                        <?php
+                        while ($d_kriteria = mysqli_fetch_array($h_kriteria)) {
 
-                        ?>
-                        <td style="font-weight:bold; color:#F30;"><?php echo number_format($r['nilai'], 3, ',', '.'); ?></td>
-                        <td style="font-weight:bold; color:#360; text-align:center;"><?php echo $r['rank']; ?></td>
+                            ?>
+                            <td style="font-weight:bold; color:#039;"><?php echo number_format($d_kriteria['nilai'], 3, ',', '.'); ?></td>
+                        <?php } ?>
+                        <td></td>
+                        <td></td>
                     </tr>
                     <?php
-                    $no++;
-                }
+                    $tampil = "SELECT a.id_alternatif, a.nama_alternatif, b.nilai, b.rank 
+              FROM ahp_alternatif as a, ahp_nilai_hasil as b
+              WHERE a.id_alternatif=b.id_alternatif AND a.id_seleksi='$seleksi' 
+			  ORDER BY a.id_alternatif ASC";
+                    $h_tampil = querydb($tampil);
+                    $no = 1;
+                    while ($r = mysqli_fetch_array($h_tampil)) {
+                        $n_alternatif = sprintf("A%03d", $no);
 
-                ?>
-            </table>
+                        ?>
+                        <tr>
+                            <td><?php echo $no; ?></td>
+                            <td><?php echo $n_alternatif . ' - ' . $r['nama_alternatif']; ?></td>
+                            <?php
+                            $nilai_akhir = 0;
+                            $h_kriteria = querydb("SELECT a.id_kriteria_seleksi, c.nilai FROM ahp_kriteria_seleksi as a, ahp_kriteria as b, ahp_nilai_eigen as c
+							   WHERE a.id_kriteria=b.id_kriteria AND c.id_node_0=0 AND c.id_node=a.id_kriteria_seleksi
+								   AND a.id_seleksi='$seleksi' ORDER BY a.id_kriteria_seleksi ASC");
+                            while ($d_kriteria = mysqli_fetch_array($h_kriteria)) {
+                                //Ambil Nilai Hasil Alternatif
+                                $h_nilai = querydb("SELECT nilai FROM ahp_nilai_eigen WHERE id_node_0='$d_kriteria[id_kriteria_seleksi]' AND id_node='$r[id_alternatif]'");
+                                $d_nilai = mysqli_fetch_array($h_nilai);
+
+                                ?>
+                                <td><?php echo number_format($d_nilai['nilai'], 3, ',', '.'); ?></td>
+                                <?php
+                            }
+
+                            ?>
+                            <td style="font-weight:bold; color:#F30;"><?php echo number_format($r['nilai'], 3, ',', '.'); ?></td>
+                            <td style="font-weight:bold; color:#360; text-align:center;"><?php echo $r['rank']; ?></td>
+                        </tr>
+                        <?php
+                        $no++;
+                    }
+
+                    ?>
+                </table>
+            </div>
         <?php } ?>
     </div>
 </div>
