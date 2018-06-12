@@ -365,20 +365,21 @@ if (!empty($seleksi)) {
     </div>
 
     <div class="card">
+        <?php
+        $h_node = querydb("SELECT a.id_kriteria_seleksi FROM ahp_kriteria_seleksi as a, ahp_kriteria as b
+					 WHERE a.id_kriteria=b.id_kriteria AND a.id_seleksi='$seleksi'
+					 ORDER BY a.id_kriteria_seleksi ASC");
+        $jml_node = mysqli_num_rows($h_node);
+
+        ?>
         <!-- Matriks Nilai Perbandingan -->
-        <?php if ($seleksi != "") { ?>
+        <?php if (!empty($seleksi) && !empty($jml_node)) { ?>
             <!-- ++++++++++++++ DIHITUNG EIGENNYA DISINI ++++++++++++++++ -->
             <div class="card-header"><h5>Matriks Nilai Perbandingan</h5></div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table" border="0" cellspacing="0" cellpadding="4">
-                        <?php
-                        $h_node = querydb("SELECT a.id_kriteria_seleksi FROM ahp_kriteria_seleksi as a, ahp_kriteria as b
-					 WHERE a.id_kriteria=b.id_kriteria AND a.id_seleksi='$seleksi'
-					 ORDER BY a.id_kriteria_seleksi ASC");
-                        $jml_node = mysqli_num_rows($h_node);
 
-                        ?>
                         <tr>
                             <td width='3%'>No.</td>
                             <td>Kriteria</td>

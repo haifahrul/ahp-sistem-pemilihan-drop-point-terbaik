@@ -50,9 +50,23 @@ if (@$_POST['stat_simpan']) {
     }
 } elseif ($stat == "hapus" && $id != "") {
     querydb("DELETE FROM ahp_seleksi WHERE id_seleksi='$id'");
+    querydb("DELETE FROM ahp_alternatif WHERE id_seleksi='$id'");
+    querydb("DELETE FROM ahp_kandidat WHERE id_seleksi='$id'");
+
+    $selectIdKriteriaSeleksi = querydb("SELECT id_kriteria_seleksi FROM ahp_kriteria_seleksi WHERE id_seleksi='$id'");
+    
+    foreach ($selectIdKriteriaSeleksi as $val) {
+        $idKs = $val['id_kriteria_seleksi'];
+        querydb("DELETE FROM ahp_nilai_eigen WHERE id_node_0='$idKs' AND tipe=1");
+        querydb("DELETE FROM ahp_nilai_eigen WHERE id_node='$idKs' AND tipe=2");
+        querydb("DELETE FROM ahp_nilai_pasangan WHERE id_node_0='$idKs' AND tipe=1");
+        querydb("DELETE FROM ahp_nilai_pasangan WHERE id_node_2='$idKs' AND tipe=2");
+    }
+
+    querydb("DELETE FROM ahp_kriteria_seleksi WHERE id_seleksi='$id'");
 
     ?>
-    <script language="JavaScript">document.location = '?h=seleksi&con=3'</script>
+    <!--<script language="JavaScript">document.location = '?h=seleksi&con=3'</script>-->
     <?php
 }
 
