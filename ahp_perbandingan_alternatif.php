@@ -8,12 +8,12 @@ if (!empty($seleksi)) {
     $d_seleksi = mysqli_fetch_array(querydb("SELECT id_seleksi FROM ahp_seleksi ORDER BY tahun DESC, id_seleksi DESC LIMIT 0, 1"));
 //    $seleksi = $d_seleksi['id_seleksi'];
 
-    $kriteriaSeleksiQuery = $q_seleksi = "SELECT * FROM ahp_kriteria_seleksi aks JOIN ahp_kriteria ak ON ak.id_kriteria = aks.id_kriteria WHERE aks.id_seleksi = " . $seleksi;
+    $kriteriaSeleksiQuery = $q_seleksi = "SELECT * FROM ahp_kriteria_seleksi aks JOIN ahp_kriteria ak ON ak.id_kriteria = aks.id_kriteria WHERE aks.id_seleksi = '$seleksi' ORDER BY ak.id_kriteria ASC" ;
     $kriteriaSeleksi = querydb($kriteriaSeleksiQuery);
     $kriteriaSeleksiAfterSave = querydb($kriteriaSeleksiQuery);
     $kriteriaSeleksiCount = $kriteriaSeleksi->num_rows;
 
-    $dataAlternatifQuery = $q_seleksi = "SELECT * FROM ahp_alternatif WHERE id_seleksi = " . $seleksi;
+    $dataAlternatifQuery = $q_seleksi = "SELECT * FROM ahp_alternatif aa WHERE id_seleksi = '$seleksi' ORDER BY aa.id_alternatif ASC";
     $dataAlternatif = querydb($dataAlternatifQuery);
     $dataAlternatifCount = $dataAlternatif->num_rows;
 
