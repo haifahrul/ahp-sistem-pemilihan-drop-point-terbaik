@@ -395,12 +395,12 @@ $h = antiinjec(@$_GET['h']);
             <!-- modernizr js -->
             <script type="text/javascript" src="assets/js/modernizr/modernizr.js"></script>
             <!-- am chart -->
-            <script src="assets/pages/widget/amchart/amcharts.min.js"></script>
-            <script src="assets/pages/widget/amchart/serial.min.js"></script>
+            <!--<script src="assets/pages/widget/amchart/amcharts.min.js"></script>-->
+            <!--<script src="assets/pages/widget/amchart/serial.min.js"></script>-->
             <!-- Chart js -->
-            <script type="text/javascript" src="assets/js/chart.js/Chart.js"></script>
+            <!--<script type="text/javascript" src="assets/js/chart.js/Chart.js"></script>-->
             <!-- Todo js -->
-            <script type="text/javascript " src="assets/pages/todo/todo.js "></script>
+            <!--<script type="text/javascript " src="assets/pages/todo/todo.js "></script>-->
             <!-- Custom js -->
             <!--<script type="text/javascript" src="assets/pages/dashboard/custom-dashboard.min.js"></script>-->
             <script type="text/javascript" src="assets/js/script.js"></script>

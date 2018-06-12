@@ -2,181 +2,66 @@
 include "./config/koneksi.php";
 include "./config/library.php";
 opendb();
-$seleksi = (int) @$_SESSION['seleksi'];
-$kriteria = (int) @$_POST['kriteria'];
-$urut = @$_POST['urut'];
-if ($urut == "") {
-    $urut = "DESC";
+
+$seleksi = (int) @$_GET['seleksi'];
+
+$dataQuery = "SELECT * FROM ahp_alternatif WHERE id_seleksi='$seleksi'";
+$dataQueryDb = querydb($dataQuery);
+
+$data = [];
+$label = [];
+$xKey = 0;
+$yKeys = [];
+
+foreach ($dataQueryDb as $key => $value) {
+    $getNliaiEigen = querydb("SELECT a.id_node_0, a.nilai, d.kriteria FROM ahp_nilai_eigen a
+LEFT JOIN ahp_kriteria_seleksi c ON c.id_kriteria_seleksi = a.id_node_0
+LEFT JOIN ahp_kriteria d ON d.id_kriteria = c.id_kriteria
+WHERE tipe=1 AND a.id_node='$value[id_alternatif]' ORDER BY a.id_nilai_eigen ASC");
+
+    if ($key != 0) {
+        $yKeys[] = $key;
+    }
+
+    $i = 1;
+    $data[$key][] = $value['catatan'];
+    foreach ($getNliaiEigen as $value2) {
+        $data[$key][$i] = $value2['nilai'];
+        $label[$key][] = $value2['kriteria'];
+        $i++;
+    };
 }
 
 ?>
 
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
-    <head>		
+    <head>
         <title>Grafik Garis</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
             <meta http-equiv="X-UA-Compatible" content="IE=edge">
-                <link rel="stylesheet" href="css/elegant-press.css" type="text/css" />
-                <script src="scripts/elegant-press.js" type="text/javascript"></script>
-                <script src="./js/jquery-1.10.2.min.js"></script>
-                <script src="./js/knockout-3.0.0.js"></script>
-                <script src="./js/globalize.min.js"></script>
-                <script src="./js/dx.chartjs.js"></script>
-                <style>
-                    body { background:none; }
-                    table { border:none; }
-                    table tr td { border:none; }
-                </style>
-                </head>
-                <body>
-                    <?php
-                    if ($kriteria == 0) {
-                        $krit = "";
-                    } else {
-                        $krit = "AND b.id_kriteria_seleksi='" . $kriteria . "'";
-                    }
-
-                    $queryX = "SELECT a.id_alternatif, a.nama_alternatif, b.nilai FROM ahp_alternatif as a, ahp_nilai_hasil as b WHERE a.id_alternatif=b.id_alternatif AND a.id_seleksi='$seleksi' ORDER BY b.nilai $urut";
-                    $hqueryX = querydb($queryX);
-                    $data = [];
-                    $no = 0;
-                    while ($dquX = mysqli_fetch_array($hqueryX)) {
-                        $data[$no]['country'] = $dquX['nama_alternatif'];
-
-                        $qk2 = "SELECT b.id_kriteria_seleksi, a.id_kriteria, a.kriteria FROM ahp_kriteria as a, ahp_kriteria_seleksi as b WHERE a.id_kriteria=b.id_kriteria AND b.id_seleksi=$seleksi $krit ORDER BY a.id_kriteria ASC";
-                        $hk2 = querydb($qk2);
-                        while ($dk2 = mysqli_fetch_array($hk2)) {
-                            /* Ambil Nilai yang sudah disimpan (lalu tampilkan) */
-                            $qn = "SELECT nilai FROM ahp_nilai_eigen WHERE tipe=1 AND id_node_0='$dk2[id_kriteria_seleksi]' AND id_node='$dquX[id_alternatif]'";
-                            $hn = querydb($qn);
-                            $dn = mysqli_fetch_array($hn);
-
-                            $data[$no]['dua' . $dk2['id_kriteria_seleksi']] = number_format($dn['nilai'], 1);
-                        }
-                        $no++;
-                    }
-
-//                    var_dump($data);
-//                    exit;
-                    /*
-                      { country: "China", SKHUN: 74.2, BP: 308.6, BTT: 35.1},
-                      { country: "Russia", SKHUN: 40, BP: 128.5, BTT: 361.8, },
-                      { country: "Japan", SKHUN: 22.6, BP: 241.5, BTT: 64.9, },
-                      { country: "India", SKHUN: 19, BP: 119.3, BTT: 28.9, },
-                      { country: "Germany", SKHUN: 6.1, BP: 123.6, BTT: 77.3, },
-                     */
-
-                    $qk2 = "SELECT b.id_kriteria_seleksi, a.id_kriteria, a.kriteria 
-                                 FROM ahp_kriteria as a, ahp_kriteria_seleksi as b
-                                 WHERE a.id_kriteria=b.id_kriteria AND b.id_seleksi=$seleksi $krit 
-                                 ORDER BY a.id_kriteria ASC";
-                    $hk2 = querydb($qk2);
-                    $i = 0;
-                    $series = [];
-                    while ($dk2 = mysqli_fetch_array($hk2)) {
-                        $series[$i]['valueField'] = 'dua' . $dk2['id_kriteria_seleksi'];
-                        $series[$i]['name'] = $dk2['kriteria'];
-
-                        $i++;
-                    }
-                    /*
-                      { valueField: "oil", name: "Oil" },
-                      { valueField: "gas", name: "Natural gas" },
-                      { valueField: "coal", name: "Coal" },
-                      { valueField: "nuclear", name: "Nuclear" }
-                     */
-
-                    ?>
+                <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+                    <link rel="stylesheet" href="css/morris.css" type="text/css"/>
+                    <script src="./js/jquery-1.10.2.min.js"></script>
+                    <script src="./js/raphael-min.js"></script>
+                    <script src="./js/morris.min.js"></script>
+                    </head>
+                    <body>
+                        <div class="chart" id="line-chart"></div>
+                    </body>
                     <script>
-                        $(function () {
-
-                            var dataSource = <?php echo json_encode($data) ?>;
-
-                            $("#chartContainer").dxChart({
-                                equalBarWidth: false,
-                                dataSource: dataSource,
-                                commonSeriesSettings: {
-                                    argumentField: "country",
-                                    type: "bar"
-                                },
-                                series: <?php echo json_encode($series) ?>,
-                                legend: {
-                                    verticalAlignment: "bottom",
-                                    horizontalAlignment: "center",
-                                    itemTextPosition: "bottom"
-                                },
-                                title: "",
-                                tooltip: {
-                                    enabled: true,
-                                    customizeText: function () {
-                                        return this.valueText;
-                                    }
-                                }
-                            });
-                        }
-
-                        );
+                        // LINE CHART
+                        new Morris.Line({
+                            element: 'line-chart',
+                            data: <?php echo json_encode($data) ?>,
+                            xkey: <?php echo $xKey ?>, // value x
+                            ykeys: <?php echo json_encode($yKeys) ?>, // value y
+                            labels: <?php echo json_encode($label[0]) ?>, // Label in popup info
+                            lineColors: ['#00cccc', '#f08080', '#3990d2', '#d7b8ff', '#00e595', '#a1f65f', '#41e3e7', '#ff7400', '#fff68f', '#aaaaaa'],
+                            hideHover: false,
+                            parseTime: false,
+                            resize: true,
+                            redraw: true
+                        });
                     </script>
-                    <div class="cek">
-                        <form id="form1" name="form1" method="post" action="grafik_1.php">
-                            <table width="100%" border="0" cellspacing="0" cellpadding="4">
-                                <tr>
-                                    <td width="6%">Kriteria</td>
-                                    <td width="1%">:</td>
-                                    <td width="84%">
-                                        <select name="kriteria" style="height:25px;">
-                                            <option value="" <?php
-                                            if ($kriteria == "") {
-                                                echo"selected";
-                                            }
-
-                                            ?>>- Semua Kriteria -</option>
-                                                    <?php
-                                                    opendb();
-                                                    $query = "SELECT b.id_kriteria_seleksi, a.id_kriteria, a.kriteria FROM ahp_kriteria as a, ahp_kriteria_seleksi as b
-					  		  WHERE a.id_kriteria=b.id_kriteria AND b.id_seleksi=$seleksi ORDER BY id_kriteria ASC";
-                                                    $hquery = querydb($query);
-                                                    closedb();
-                                                    while ($dqu = mysqli_fetch_array($hquery)) {
-
-                                                        ?>
-                                                <option value="<?php echo"$dqu[id_kriteria_seleksi]"; ?>" <?php
-                                                if ($kriteria == $dqu['id_kriteria_seleksi']) {
-                                                    echo"selected";
-                                                }
-
-                                                ?>><?php echo"$dqu[kriteria]"; ?></option>
-                                                    <?php } ?>
-                                        </select>
-                                        <select name="urut" style="height:25px;">
-                                            <option value="DESC" <?php
-                                            if ($urut == "DESC") {
-                                                echo"selected";
-                                            }
-
-                                            ?>>DESC</option>
-                                            <option value="ASC" <?php
-                                            if ($urut == "ASC") {
-                                                echo"selected";
-                                            }
-
-                                            ?>>ASC</option>
-                                        </select>
-                                    </td>
-                                    <td width="9%"><input type="submit" name="b_lihat"  value="Perbarui Grafik" class="tombol"/></td>
-                                </tr>
-                            </table>
-                        </form>
-                    </div>
-                    <div style="width:100%; height:5px; margin-bottom:20px; border-bottom:2px solid #09F;"></div>
-                    <div class="content">
-                        <div class="pane">
-                            <div class="long-title"><h3></h3></div>
-                            <div id="chartContainer" class="case-container" style="width: 100%; height: 350px;"></div>
-                        </div>
-                    </div>
-
-
-                </body>
-                </html>
+                    </html>
