@@ -8,7 +8,7 @@ if (!empty($seleksi)) {
     $d_seleksi = mysqli_fetch_array(querydb("SELECT id_seleksi FROM ahp_seleksi ORDER BY tahun DESC, id_seleksi DESC LIMIT 0, 1"));
 //    $seleksi = $d_seleksi['id_seleksi'];
 
-    $kriteriaSeleksiQuery = $q_seleksi = "SELECT * FROM ahp_kriteria_seleksi aks JOIN ahp_kriteria ak ON ak.id_kriteria = aks.id_kriteria WHERE aks.id_seleksi = '$seleksi' ORDER BY ak.id_kriteria ASC" ;
+    $kriteriaSeleksiQuery = $q_seleksi = "SELECT * FROM ahp_kriteria_seleksi aks JOIN ahp_kriteria ak ON ak.id_kriteria = aks.id_kriteria WHERE aks.id_seleksi = '$seleksi' ORDER BY ak.id_kriteria ASC";
     $kriteriaSeleksi = querydb($kriteriaSeleksiQuery);
     $kriteriaSeleksiAfterSave = querydb($kriteriaSeleksiQuery);
     $kriteriaSeleksiCount = $kriteriaSeleksi->num_rows;
@@ -213,7 +213,7 @@ if (!empty($seleksi)) {
 
                     foreach ($skala as $key => $val) {
                         if ((float) $nilai >= (float) $val[1]) {
-//                        var_dump($key . ': ' . $nilai . ' >= ' . $val[1]);
+//                            var_dump($key . ': ' . $nilai . ' >= ' . $val[1]);
                             if ($key == 0) {
                                 $nilai_1 = $val[0];
                                 $nilai_2 = 9;
@@ -239,11 +239,13 @@ if (!empty($seleksi)) {
                                 $nilai_1 = $val[0];
                                 $nilai_2 = 2;
                             } elseif ($key == 8) {
-                                $nilai_1 = 2;
-                                $nilai_2 = 1 / 2;
-                            } elseif ($key == 8 && $val[1] == 0) {
-                                $nilai_1 = $val[0];
-                                $nilai_2 = 1;
+                                if ((float) $nilai == 0) {
+                                    $nilai_1 = 1;
+                                    $nilai_2 = 1;
+                                } elseif ((float) $nilai >= 0) {
+                                    $nilai_1 = 2;
+                                    $nilai_2 = 1 / 2;
+                                }
                             } elseif ($key == 9) {
                                 $nilai_1 = $val[0];
                                 $nilai_2 = 2;
@@ -271,8 +273,6 @@ if (!empty($seleksi)) {
                             }
 
                             break;
-                        } else {
-                            continue;
                         }
                     }
 
@@ -892,15 +892,37 @@ if (!empty($seleksi)) {
                                 <?php
                                 $n++;
                             }
+
                             $eigen[$no - 1] = $jumlah_normalisasi / $jml_node;
                             $urut = $no - 1;
-                            //Simpan Bobot di Tabel
+
+                            /* Simpan Bobot di Tabel */
                             $cek_data = mysqli_fetch_array(querydb("SELECT COUNT(*) FROM ahp_nilai_eigen WHERE tipe=1 AND id_node_0='$kriteria' AND id_node='$r[id_alternatif]'"));
+                            $eigenUrut = number_format($eigen[$urut], 2);
+
+//                            if (!empty($kriteria)) {
                             if ($cek_data[0] == 0) {
-                                querydb("INSERT INTO ahp_nilai_eigen(tipe, id_node_0, id_node, nilai) VALUES (1, '$kriteria', '$r[id_alternatif]', '$eigen[$urut]')");
+                                querydb("INSERT INTO ahp_nilai_eigen(tipe, id_node_0, id_node, nilai) VALUES (1, '$kriteria', '$r[id_alternatif]', '$eigenUrut')");
                             } else {
-                                querydb("UPDATE ahp_nilai_eigen SET nilai='$eigen[$urut]' WHERE tipe=1 AND id_node_0='$kriteria' AND id_node='$r[id_alternatif]'");
+                                querydb("UPDATE ahp_nilai_eigen SET nilai='$eigenUrut' WHERE tipe=1 AND id_node_0='$kriteria' AND id_node='$r[id_alternatif]'");
                             }
+//                            } else {
+//                                
+//                                foreach ($kriteriaSeleksi as $val) {
+////                                    var_dump($r);
+////                                    var_dump($val);
+//                                }
+//                                $cek_data_2 = mysqli_fetch_array(querydb("SELECT COUNT(*) FROM ahp_nilai_eigen WHERE tipe=1 AND id_node_0='$kriteria' AND id_node='$r[id_alternatif]'"));
+//                                $get_data_kriteria = querydb("SELECT * FROM ahp_kriteria_seleksi WHERE id_seleksi='$seleksi'");
+//
+//                                foreach ($get_data_kriteria as $val) {
+//                                    if ($cek_data_2[0] == 0) {
+//                                        querydb("INSERT INTO ahp_nilai_eigen(tipe, id_node_0, id_node, nilai) VALUES (1, '$val[id_kriteria]', '$r[id_alternatif]', '$eigenUrut')");
+//                                    } else {
+//                                        querydb("UPDATE ahp_nilai_eigen SET nilai='$eigenUrut' WHERE tipe=1 AND id_node_0='$val[id_kriteria]' AND id_node='$r[id_alternatif]'");
+//                                    }
+//                                }
+//                            }
 
                             ?>
                             <td style="font-weight:bold; color:#333;">
@@ -1033,3 +1055,337 @@ if (!empty($seleksi)) {
         </div>
     </div>
 <?php } ?>
+
+<?php
+/* PROSES HITUNG NILAI EIGEN KETIKA USER TIDAK PILIH KRITERIA */
+/*
+  if (!empty($seleksi) && empty($kriteria)) {
+  foreach ($kriteriaSeleksi as $key => $val) {
+
+  ?>
+
+  <div class="card">
+  <!-- ++++++++++++++ DIHITUNG EIGENNYA DISINI ++++++++++++++++ -->
+  <div class="card-header">
+  <h5>Nilai Perbandingan</h5>
+  </div>
+  <div class="card-body">
+  <div class="table-responsive">
+  <table class="table">
+  <?php
+  $h_node = querydb("SELECT id_alternatif, nama_alternatif FROM ahp_alternatif WHERE id_seleksi='$seleksi' ORDER BY id_alternatif ASC");
+  $jml_node = mysqli_num_rows($h_node);
+
+  ?>
+  <tr>
+  <td width='3%'>No.</td>
+  <td>
+  <?php echo $kasus_objek; ?>
+  </td>
+  <?php
+  for ($i = 1; $i <= $jml_node; $i++) {
+
+  ?>
+  <td>
+  <?php echo sprintf("A%03d", $i); ?>
+  </td>
+  <?php } ?>
+  </tr>
+  <?php
+  $total = array();  //Array untuk menyimpan jumlah total
+  $tampil = "SELECT id_alternatif, nama_alternatif FROM ahp_alternatif WHERE id_seleksi='$seleksi' ORDER BY id_alternatif ASC";
+  $h_tampil = querydb($tampil);
+  $no = 1;
+  while ($r = mysqli_fetch_array($h_tampil)) {
+  $n_node = sprintf("A%03d", $no);
+
+  ?>
+  <tr>
+  <td>
+  <?php echo $no; ?>
+  </td>
+  <td>
+  <?php echo $n_node . ' - ' . $r['nama_alternatif']; ?>
+  </td>
+  <?php
+  $n = 0;
+  $h_node = querydb("SELECT id_alternatif, nama_alternatif FROM ahp_alternatif WHERE id_seleksi='$seleksi' ORDER BY id_alternatif ASC");
+  while ($d_node = mysqli_fetch_array($h_node)) {
+  $nilai_pasang = 0;
+  $h_nilai1 = querydb("SELECT nilai_1 FROM ahp_nilai_pasangan WHERE tipe=1 AND id_node_0='$val[id_kriteria_seleksi]' AND
+  id_node_1='$r[id_alternatif]' AND id_node_2='$d_node[id_alternatif]'");
+  $d_nilai1 = mysqli_fetch_array($h_nilai1);
+  $h_nilai2 = querydb("SELECT nilai_2 FROM ahp_nilai_pasangan WHERE tipe=1 AND id_node_0='$val[id_kriteria_seleksi]' AND
+  id_node_2='$r[id_alternatif]' AND id_node_1='$d_node[id_alternatif]'");
+  $d_nilai2 = mysqli_fetch_array($h_nilai2);
+  if ($d_nilai1[0] == 0) {
+  $nilai_pasang = $d_nilai2[0];
+  } else {
+  $nilai_pasang = $d_nilai1[0];
+  }
+  if ($nilai_pasang == 0 || $nilai_pasang == "") {
+  $nilai_pasang = 1;
+  }
+
+  // if (!empty ($total[$n])) {
+  //   $total[$n]=$total[$n]+$nilai_pasang;
+  // }
+  $jumlah[$n][] = $nilai_pasang;
+
+  ?>
+  <td>
+  <?php echo number_format($nilai_pasang, 2, ',', '.'); ?>
+  </td>
+  <?php
+  $n++;
+  }
+
+  ?>
+  </tr>
+  <?php
+  $no++;
+  }
+
+  ?>
+  <tr>
+  <td></td>
+  <td style="font-weight:bold; color:#333;">Jumlah</td>
+  <?php
+  for ($i = 0; $i < $jml_node; $i++) {
+  $sum = array_sum($jumlah[$i]);
+  $total[$i] = $sum;
+
+  ?>
+  <td style="font-weight:bold; color:#333;">
+  <?php echo number_format($total[$i], 2, ",", '.'); ?>
+  </td>
+  <?php } ?>
+  </tr>
+  </table>
+  </div>
+  </div>
+  </div>
+
+  <div class="card">
+  <div class="card-header">
+  <h5>Normalisasi Dan Nilai Eigen</h5>
+  </div>
+  <div class="card-body">
+  <div class="table-responsive">
+  <table class="table">
+  <?php
+  $h_node = querydb("SELECT id_alternatif, nama_alternatif FROM ahp_alternatif WHERE id_seleksi='$seleksi' ORDER BY id_alternatif ASC");
+  $jml_node = mysqli_num_rows($h_node);
+
+  ?>
+  <tr>
+  <td width='3%'>No.</td>
+  <td>
+  <?php echo $kasus_objek; ?>
+  </td>
+  <?php
+  for ($i = 1; $i <= $jml_node; $i++) {
+
+  ?>
+  <td>
+  <?php echo sprintf("A%03d", $i); ?>
+  </td>
+  <?php } ?>
+  <td style="font-weight:bold; color:#09F;">Eigen</td>
+  </tr>
+  <?php
+  $eigen = array();
+  $tampil = "SELECT id_alternatif, nama_alternatif FROM ahp_alternatif WHERE id_seleksi='$seleksi' ORDER BY id_alternatif ASC";
+  $h_tampil = querydb($tampil);
+  $no = 1;
+  while ($r = mysqli_fetch_array($h_tampil)) {
+  $n_node = sprintf("A%03d", $no);
+
+  ?>
+  <tr>
+  <td>
+  <?php echo $no; ?>
+  </td>
+  <td>
+  <?php echo $n_node . ' - ' . $r['nama_alternatif']; ?>
+  </td>
+  <?php
+  $n = 0;
+  $jumlah_normalisasi = 0;
+  $h_node = querydb("SELECT id_alternatif, nama_alternatif FROM ahp_alternatif WHERE id_seleksi='$seleksi' ORDER BY id_alternatif ASC");
+  while ($d_node = mysqli_fetch_array($h_node)) {
+  $nilai_pasang = 0;
+  $h_nilai1 = querydb("SELECT nilai_1 FROM ahp_nilai_pasangan WHERE tipe=1 AND id_node_0='$val[id_kriteria_seleksi]' AND
+  id_node_1='$r[id_alternatif]' AND id_node_2='$d_node[id_alternatif]'");
+  $d_nilai1 = mysqli_fetch_array($h_nilai1);
+  $h_nilai2 = querydb("SELECT nilai_2 FROM ahp_nilai_pasangan WHERE tipe=1 AND id_node_0='$val[id_kriteria_seleksi]' AND
+  id_node_2='$r[id_alternatif]' AND id_node_1='$d_node[id_alternatif]'");
+  $d_nilai2 = mysqli_fetch_array($h_nilai2);
+  if ($d_nilai1[0] == 0) {
+  $nilai_pasang = $d_nilai2[0];
+  } else {
+  $nilai_pasang = $d_nilai1[0];
+  }
+  if ($nilai_pasang == 0 || $nilai_pasang == "") {
+  $nilai_pasang = 1;
+  }
+  $nilai_normalisasi = $nilai_pasang / $total[$n];
+  $jumlah_normalisasi = $jumlah_normalisasi + $nilai_normalisasi;
+
+  ?>
+  <td>
+  <?php echo number_format($nilai_normalisasi, 3, ',', '.'); ?>
+  </td>
+  <?php
+  $n++;
+  }
+
+  $eigen[$no - 1] = $jumlah_normalisasi / $jml_node;
+  $urut = $no - 1;
+
+  // Simpan Bobot di Tabel
+  $cek_data = mysqli_fetch_array(querydb("SELECT COUNT(*) FROM ahp_nilai_eigen WHERE tipe=1 AND id_node_0='$val[id_kriteria_seleksi]' AND id_node='$r[id_alternatif]'"));
+  $eigenUrut = number_format($eigen[$urut], 2);
+
+  if ($cek_data[0] == 0) {
+  querydb("INSERT INTO ahp_nilai_eigen(tipe, id_node_0, id_node, nilai) VALUES (1, '$val[id_kriteria_seleksi]', '$r[id_alternatif]', '$eigenUrut')");
+  } else {
+  querydb("UPDATE ahp_nilai_eigen SET nilai='$eigenUrut' WHERE tipe=1 AND id_node_0='$val[id_kriteria_seleksi]' AND id_node='$r[id_alternatif]'");
+  }
+
+  ?>
+  <td style="font-weight:bold; color:#333;">
+  <?php echo number_format($eigen[$no - 1], 3, ',', '.'); ?>
+  </td>
+  </tr>
+  <?php
+  $no++;
+  }
+
+  ?>
+  </table>
+  </div>
+  </div>
+  </div>
+  <div class="card">
+  <div class="card-header">
+  <h5>Cek Konsistensi</h5>
+  <span>Hasil Cek Nilai Konsistensi</span>
+  </div>
+  <div class="card-body">
+  <div class="table-responsive">
+  <table class="table">
+  <tr>
+  <td width="21%">(A)(W^t)</td>
+  <td width="1%">:</td>
+  <td width="78%">
+  <?php
+  //Menghitung (A)(Wt)
+  $AWt = array();
+  $tampil = "SELECT id_alternatif, nama_alternatif FROM ahp_alternatif WHERE id_seleksi='$seleksi' ORDER BY id_alternatif ASC";
+  $h_tampil = querydb($tampil);
+  $no = 0;
+  while ($r = mysqli_fetch_array($h_tampil)) {
+  $AWt_line = 0; //Nilai AWt per baris
+  $n = 0;
+  $h_node = querydb("SELECT id_alternatif, nama_alternatif FROM ahp_alternatif WHERE id_seleksi='$seleksi' ORDER BY id_alternatif ASC");
+  while ($d_node = mysqli_fetch_array($h_node)) {
+  $nilai_pasang = 0;
+  $h_nilai1 = querydb("SELECT nilai_1 FROM ahp_nilai_pasangan WHERE tipe=1 AND id_node_0='$val[id_kriteria_seleksi]' AND
+  id_node_1='$r[id_alternatif]' AND id_node_2='$d_node[id_alternatif]'");
+  $d_nilai1 = mysqli_fetch_array($h_nilai1);
+  $h_nilai2 = querydb("SELECT nilai_2 FROM ahp_nilai_pasangan WHERE tipe=1 AND id_node_0='$val[id_kriteria_seleksi]' AND
+  id_node_2='$r[id_alternatif]' AND id_node_1='$d_node[id_alternatif]'");
+  $d_nilai2 = mysqli_fetch_array($h_nilai2);
+  if ($d_nilai1[0] == 0) {
+  $nilai_pasang = $d_nilai2[0];
+  } else {
+  $nilai_pasang = $d_nilai1[0];
+  }
+  if ($nilai_pasang == 0 || $nilai_pasang == "") {
+  $nilai_pasang = 1;
+  }
+  $AWt_line = $AWt_line + ($nilai_pasang * $eigen[$n]);
+  //echo $nilai_pasang.'x'.$eigen[$n].' | ';
+  $n++;
+  }
+  //echo "<br>";
+  $AWt[$no] = $AWt_line;
+  $no++;
+  }
+  for ($i = 0; $i < $jml_node; $i++) {
+  echo "[" . number_format($AWt[$i], 4, ',', '.') . "] ";
+  }
+
+  ?>
+  </td>
+
+  <tr>
+  <td>t</td>
+  <td>:</td>
+  <td>
+  <?php
+  $t = 0;
+  $tot_AWt_per_Eigen = 0;  //Nilai jumlah AWt/Eigen
+  for ($i = 0; $i < $jml_node; $i++) {
+  $tot_AWt_per_Eigen = $tot_AWt_per_Eigen + ($AWt[$i] / $eigen[$i]);
+  }
+  $t = $tot_AWt_per_Eigen / $jml_node;
+  echo number_format($t, 4, ',', '.');
+
+  ?>
+  </td>
+  </tr>
+  <tr>
+  <td>Index Konsistensi (CI)</td>
+  <td>:</td>
+  <td>
+  <?php
+  $CI = 0; //Index konsistensi
+  $CI = ($t - $jml_node) / ($jml_node - 1);
+  echo number_format($CI, 4, ',', '.');
+
+  ?>
+  </td>
+  </tr>
+  <tr>
+  <td>Rasio Konsistensi</td>
+  <td>:</td>
+  <td>
+  <?php
+  //Ambil nilai RI berdasar besar matrix/jumlah kriteria
+  $h_nilaiRI = querydb("SELECT nilai FROM ahp_nilai_random_index WHERE matrix='$jml_node'");
+  $d_nilaiRI = mysqli_fetch_array($h_nilaiRI);
+  $nilai_RI = $d_nilaiRI['nilai'];
+
+  $Rasio_Konsistensi = $CI / $nilai_RI; //Nilai Rasio Konsisitensi
+  echo number_format($Rasio_Konsistensi, 4, ',', '.');
+
+  ?>
+  </td>
+  </tr>
+  <tr>
+  <td style="font-weight:bold; color:#333;">Hasil Konsistensi</td>
+  <td style="font-weight:bold; color:#333;">:</td>
+  <td style="font-weight:bold; color:#333;">
+  <?php
+  //Cek bila Nilai Rasio Konsisitensi <= 0,1 maka sudah Cukup Konsisten, jika > 0,1 maka tidak konsisten
+  if ($Rasio_Konsistensi <= 0.1) {
+  echo "KONSISTEN";
+  } else {
+  echo "Belum Konsisten";
+  }
+
+  ?>
+  </td>
+  </tr>
+  </table>
+  </div>
+  </div>
+  </div>
+  <?php
+  }
+  }
+ */
+
+?>

@@ -94,6 +94,10 @@ if (!empty($seleksi)) {
                 $nilai_2 = 9;
             }
 
+            
+            $nilai_1 = number_format($nilai_1, 2);
+            $nilai_2 = number_format($nilai_2, 2);
+            
             $query = "UPDATE ahp_nilai_pasangan SET nilai_1='$nilai_1', nilai_2='$nilai_2'
 				   WHERE id_nilai_pasangan='$id_pasang'";
             querydb($query);
@@ -530,10 +534,12 @@ if (!empty($seleksi)) {
                                 $urut = $no - 1;
                                 //Simpan Bobot di Tabel
                                 $cek_data = mysqli_fetch_array(querydb("SELECT COUNT(*) FROM ahp_nilai_eigen WHERE tipe=2 AND id_node_0=0 AND id_node='$r[id_kriteria_seleksi]'"));
+                                $eigenUrut = number_format($eigen[$urut], 2);
+                                
                                 if ($cek_data[0] == 0) {
-                                    querydb("INSERT INTO ahp_nilai_eigen(tipe, id_node_0, id_node, nilai) VALUES (2, 0, '$r[id_kriteria_seleksi]', '$eigen[$urut]')");
+                                    querydb("INSERT INTO ahp_nilai_eigen(tipe, id_node_0, id_node, nilai) VALUES (2, 0, '$r[id_kriteria_seleksi]', '$eigenUrut')");
                                 } else {
-                                    querydb("UPDATE ahp_nilai_eigen SET nilai='$eigen[$urut]' WHERE tipe=2 AND id_node_0=0 AND id_node='$r[id_kriteria_seleksi]'");
+                                    querydb("UPDATE ahp_nilai_eigen SET nilai='$eigenUrut' WHERE tipe=2 AND id_node_0=0 AND id_node='$r[id_kriteria_seleksi]'");
                                 }
 
                                 ?>

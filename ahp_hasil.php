@@ -13,16 +13,15 @@ $h_tampil = querydb($tampil);
 $no = 1;
 while ($r = mysqli_fetch_array($h_tampil)) {
     $nilai_akhir = 0;
-    $h_kriteria = querydb("SELECT a.id_kriteria_seleksi, nilai FROM ahp_kriteria_seleksi as a, ahp_kriteria as b, ahp_nilai_eigen as c
-							 WHERE a.id_kriteria=b.id_kriteria AND c.id_node_0=0 AND c.id_node=a.id_kriteria_seleksi
-  								AND a.id_seleksi='$seleksi' ORDER BY a.id_kriteria_seleksi ASC");
+    $h_kriteria = querydb("SELECT a.id_kriteria_seleksi, nilai FROM ahp_kriteria_seleksi as a, ahp_kriteria as b, ahp_nilai_eigen as c WHERE a.id_kriteria=b.id_kriteria AND c.id_node_0=0 AND c.id_node=a.id_kriteria_seleksi AND a.id_seleksi='$seleksi' ORDER BY a.id_kriteria_seleksi ASC");
     while ($d_kriteria = mysqli_fetch_array($h_kriteria)) {
         //Ambil Nilai Hasil Alternatif
         $h_nilai = querydb("SELECT nilai FROM ahp_nilai_eigen WHERE id_node_0='$d_kriteria[id_kriteria_seleksi]' AND id_node='$r[id_alternatif]'");
         $d_nilai = mysqli_fetch_array($h_nilai);
 
-        $nilai_akhir = $nilai_akhir + ($d_nilai['nilai'] * $d_kriteria['nilai']);
+        $nilai_akhir = number_format($nilai_akhir + ($d_nilai['nilai'] * $d_kriteria['nilai']), 2);
     }
+
     //Simpan Hasil
     $jml_baris = mysqli_num_rows(querydb("SELECT id_alternatif FROM ahp_nilai_hasil WHERE id_alternatif='$r[id_alternatif]'"));
     if ($jml_baris == 0) {
@@ -122,10 +121,10 @@ while ($d_hasil_rank = mysqli_fetch_array($hasil_rank)) {
                         <td></td>
                     </tr>
                     <?php
-                    $tampil = "SELECT a.id_alternatif, a.nama_alternatif, b.nilai, b.rank 
+                    $tampil = "SELECT a.id_alternatif, a.nama_alternatif, b.nilai, b.rank
               FROM ahp_alternatif as a, ahp_nilai_hasil as b
-              WHERE a.id_alternatif=b.id_alternatif AND a.id_seleksi='$seleksi' 
-			  ORDER BY a.id_alternatif ASC";
+              WHERE a.id_alternatif=b.id_alternatif AND a.id_seleksi='$seleksi'
+			  ORDER BY b.rank ASC";
                     $h_tampil = querydb($tampil);
                     $no = 1;
                     while ($r = mysqli_fetch_array($h_tampil)) {
