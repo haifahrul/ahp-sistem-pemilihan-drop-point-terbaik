@@ -131,7 +131,7 @@ if (!empty($seleksi)) {
 
                 $dataArrayAlternatifSelisih = array_merge($alternatifSelisih1['skala_selisih'], $alternatifSelisih2['skala_selisih']);
 //            var_dump($alternatifIdPasangan);
-                var_dump($dataArrayAlternatifSelisih);
+//                var_dump($dataArrayAlternatifSelisih);
 //            var_dump(max($dataArrayAlternatifSelisih));
 //            var_dump(min($dataArrayAlternatifSelisih));
 

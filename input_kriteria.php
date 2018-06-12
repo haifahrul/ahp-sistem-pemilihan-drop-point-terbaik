@@ -50,6 +50,12 @@ if (@$_POST['stat_simpan']) {
     }
 } elseif ($stat == "hapus" && $id != "") {
     querydb("DELETE FROM ahp_kriteria WHERE id_kriteria='$id'");
+    querydb("DELETE FROM ahp_kandidat WHERE id_kriteria='$id'");
+    $getIdKriteriaSeleksiQueryDb = querydb("SELECT id_kriteria_seleksi FROM ahp_kriteria_seleksi WHERE id_kriteria='$id'");
+    $getIdKriteriaSeleksi = mysqli_fetch_row($getIdKriteriaSeleksiQueryDb);
+    querydb("DELETE FROM ahp_kriteria_seleksi WHERE id_kriteria='$id'");
+    querydb("DELETE FROM ahp_nilai_eigen WHERE id_node='$getIdKriteriaSeleksi[0]'");
+    querydb("DELETE FROM ahp_nilai_pasangan WHERE id_node_2='$getIdKriteriaSeleksi[0]'");
 
     ?>
     <script language="JavaScript">document.location = '?h=kriteria&con=3'</script>
@@ -92,8 +98,8 @@ if (@$_POST['stat_simpan']) {
                     <label class="col-sm-2 col-form-label">Apakah Butuh Nilai Konversi?</label>
                     <div class="col-sm-10 validate">
 
-                        <input type="radio" name="is_konversi" value="1" <?php echo !empty($data['is_konversi']) ? $data['is_konversi'] == 1 ? 'checked' : null : NULL ?>> Tidak<br>
-                        <input type="radio" name="is_konversi" value="2" <?php echo !empty($data['is_konversi']) ? $data['is_konversi'] == 2 ? 'checked' : null : null ?>> Ya<br>
+                        <input type="radio" name="is_konversi" value="1" <?php echo!empty($data['is_konversi']) ? $data['is_konversi'] == 1 ? 'checked' : null : NULL ?>> Tidak<br>
+                        <input type="radio" name="is_konversi" value="2" <?php echo!empty($data['is_konversi']) ? $data['is_konversi'] == 2 ? 'checked' : null : null ?>> Ya<br>
                     </div>
                 </div>
 
