@@ -471,6 +471,7 @@ if (!empty($seleksi)) {
     <?php } ?>
     <!-- END FORM INPUT NILAI ALTERNATIF -->
 
+
     <!-- FORM PILIH ALTERNATIF -->
     <?php if (!empty($seleksi)) { ?>
         <form class="card-body" method="post" action="?h=nilai-alternatif" enctype="multipart/form-data">
@@ -513,6 +514,9 @@ if (!empty($seleksi)) {
 
     <!-- FORM TABLE PERBANDINGAN ALTERNATIF -->
     <?php if (!empty($seleksi) && !empty($kriteria)) { ?>
+        <div class="card-body">
+            <a id="btn-cetak" href="cetak_ahp_perbandingan_alternatif.php?seleksi=<?php echo $seleksi ?>&kriteria=<?php echo $kriteria ?>" target="_blank"><div class="btn btn-success btn-sm btn-round">Cetak PDF</div></a>
+        </div>
         <form class="card-body" method="post" action="?h=nilai-alternatif" class="row-fluid margin-none">
             <input type="hidden" name="status" value="save" />
             <input type="hidden" name="seleksi" value="<?php echo $seleksi; ?>" />
@@ -776,7 +780,7 @@ if (!empty($seleksi)) {
                                 } else {
                                     $nilai_pasang = $d_nilai1[0];
                                 }
-                                if ($nilai_pasang == 0 || $nilai_pasang == "") {
+                                if ((float) $nilai_pasang == 0 || empty($nilai_pasang)) {
                                     $nilai_pasang = 1;
                                 }
 

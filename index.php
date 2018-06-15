@@ -45,20 +45,18 @@ $h = antiinjec(@$_GET['h']);
         <link rel="stylesheet" type="text/css" href="assets/css/style.css">
         <link rel="stylesheet" type="text/css" href="assets/css/jquery.mCustomScrollbar.css">
     </head>
-
     <body>
-    <body>
-<!--        <div class="fixed-button">
-            <a href="https://codedthemes.com/item/gradient-able-admin-template" target="_blank" class="btn btn-md btn-primary">
-                <i class="fa fa-shopping-cart" aria-hidden="true"></i> Upgrade To Pro
-            </a>
-        </div>-->
+        <!--        <div class="fixed-button">
+                    <a href="https://codedthemes.com/item/gradient-able-admin-template" target="_blank" class="btn btn-md btn-primary">
+                        <i class="fa fa-shopping-cart" aria-hidden="true"></i> Upgrade To Pro
+                    </a>
+                </div>-->
         <!-- Pre-loader start -->
-<!--        <div class="theme-loader">
-            <div class="loader-track">
-                <div class="loader-bar"></div>
-            </div>
-        </div>-->
+        <!--        <div class="theme-loader">
+                    <div class="loader-track">
+                        <div class="loader-bar"></div>
+                    </div>
+                </div>-->
         <!-- Pre-loader end -->
         <div id="pcoded" class="pcoded">
             <div class="pcoded-overlay-box"></div>

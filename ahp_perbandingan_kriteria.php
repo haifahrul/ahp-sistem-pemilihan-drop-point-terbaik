@@ -94,10 +94,10 @@ if (!empty($seleksi)) {
                 $nilai_2 = 9;
             }
 
-            
+
             $nilai_1 = number_format($nilai_1, 2);
             $nilai_2 = number_format($nilai_2, 2);
-            
+
             $query = "UPDATE ahp_nilai_pasangan SET nilai_1='$nilai_1', nilai_2='$nilai_2'
 				   WHERE id_nilai_pasangan='$id_pasang'";
             querydb($query);
@@ -192,6 +192,11 @@ if (!empty($seleksi)) {
     </form>
 
     <?php if (!empty($seleksi)) { ?>
+
+        <div class="card-block">
+            <a id="btn-cetak" href="cetak_ahp_perbandingan_kriteria.php?seleksi=<?php echo $seleksi ?>" target="_blank"><div class="btn btn-success btn-sm btn-round">Cetak PDF</div></a>
+        </div>
+
         <form class="card-block table-border-style" method="post" action="?h=nilai-kriteria" class="row-fluid margin-none">
             <input type="hidden" name="status" value="save" />
             <input type="hidden" name="seleksi" value="<?php echo $seleksi ?>" />
@@ -535,7 +540,7 @@ if (!empty($seleksi)) {
                                 //Simpan Bobot di Tabel
                                 $cek_data = mysqli_fetch_array(querydb("SELECT COUNT(*) FROM ahp_nilai_eigen WHERE tipe=2 AND id_node_0=0 AND id_node='$r[id_kriteria_seleksi]'"));
                                 $eigenUrut = number_format($eigen[$urut], 2);
-                                
+
                                 if ($cek_data[0] == 0) {
                                     querydb("INSERT INTO ahp_nilai_eigen(tipe, id_node_0, id_node, nilai) VALUES (2, 0, '$r[id_kriteria_seleksi]', '$eigenUrut')");
                                 } else {
@@ -672,4 +677,5 @@ if (!empty($seleksi)) {
                 </div>
             <?php } ?>
         </div>
-    <?php } ?>
+    </div>
+<?php } ?>
