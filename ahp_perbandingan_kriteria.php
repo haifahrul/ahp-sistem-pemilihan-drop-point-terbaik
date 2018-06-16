@@ -531,7 +531,7 @@ if (!empty($seleksi)) {
                                     $jumlah_normalisasi = $jumlah_normalisasi + $nilai_normalisasi;
 
                                     ?>
-                                    <td><?php echo number_format($nilai_normalisasi, 3, ',', '.'); ?></td>
+                                    <td><?php echo number_format($nilai_normalisasi, 2, ',', '.'); ?></td>
                                     <?php
                                     $n++;
                                 }
@@ -548,7 +548,7 @@ if (!empty($seleksi)) {
                                 }
 
                                 ?>
-                                <td style="font-weight:bold; color:#333;"><?php echo number_format($eigen[$no - 1], 3, ',', '.'); ?></td>
+                                <td style="font-weight:bold; color:#333;"><?php echo number_format($eigen[$no - 1], 2, ',', '.'); ?></td>
                             </tr>
                             <?php
                             $no++;
@@ -605,7 +605,7 @@ if (!empty($seleksi)) {
                                     $no++;
                                 }
                                 for ($i = 0; $i < $jml_node; $i++) {
-                                    echo "[" . number_format($AWt[$i], 4, ',', '.') . "] ";
+                                    echo "[" . number_format($AWt[$i], 2, ',', '.') . "] ";
                                 }
 
                                 ?>
@@ -622,7 +622,7 @@ if (!empty($seleksi)) {
                                     $tot_AWt_per_Eigen = $tot_AWt_per_Eigen + ($AWt[$i] / $eigen[$i]);
                                 }
                                 $t = $tot_AWt_per_Eigen / $jml_node;
-                                echo number_format($t, 4, ',', '.');
+                                echo number_format($t, 2, ',', '.');
 
                                 ?>
                             </td>
@@ -634,7 +634,7 @@ if (!empty($seleksi)) {
                                 <?php
                                 $CI = 0; //Index konsistensi
                                 $CI = ($t - $jml_node) / ($jml_node - 1);
-                                echo number_format($CI, 4, ',', '.');
+                                echo number_format($CI, 2, ',', '.');
 
                                 ?>
                             </td>
@@ -653,7 +653,7 @@ if (!empty($seleksi)) {
 //                        var_dump($CI);
 //                        exit(var_dump($nilai_RI));
                                 $Rasio_Konsistensi = $CI / $nilai_RI; //Nilai Rasio Konsisitensi
-                                echo number_format($Rasio_Konsistensi, 4, ',', '.');
+                                echo number_format($Rasio_Konsistensi, 2, ',', '.');
 
                                 ?>
                             </td>
