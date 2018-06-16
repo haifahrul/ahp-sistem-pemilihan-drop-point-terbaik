@@ -9,7 +9,10 @@ if ($usernama == "") {
 }
 $h = antiinjec(@$_GET['h']);
 
-$seleksi = antiinjec(@$_POST['seleksi']);
+$seleksi = antiinjec(@$_GET['seleksi']);
+
+$getNamaSeleksi = mysqli_fetch_row(querydb("SELECT tahun, seleksi FROM ahp_seleksi WHERE id_seleksi='$seleksi'"));
+$namaSeleksi = $getNamaSeleksi[0] . ' - ' . $getNamaSeleksi[1];
 
 //HITUNG HASIL AKHIR
 $tampil = "SELECT id_alternatif, nama_alternatif FROM ahp_alternatif WHERE id_seleksi='$seleksi' ORDER BY id_alternatif ASC";
@@ -43,6 +46,41 @@ $hasil_rank = querydb("SELECT id_alternatif, nilai FROM ahp_nilai_hasil WHERE id
 while ($d_hasil_rank = mysqli_fetch_array($hasil_rank)) {
     querydb("UPDATE ahp_nilai_hasil SET rank='$rank' WHERE id_alternatif='$d_hasil_rank[id_alternatif]'");
     $rank++;
+}
+
+// GRAFIK
+
+$dataQuery = "SELECT * FROM ahp_alternatif WHERE id_seleksi='$seleksi'";
+$dataQueryDb = querydb($dataQuery);
+$kriteriaQuery = mysqli_fetch_all(querydb("SELECT b.kriteria FROM ahp_kriteria_seleksi as a 
+LEFT JOIN ahp_kriteria as b 
+ON a.id_seleksi=a.id_seleksi WHERE a.id_seleksi='$seleksi'
+GROUP BY b.id_kriteria"));
+
+$data = [];
+$label = [];
+$xKey = 0;
+$yKeys = [];
+$kriteriaColors = [];
+$lineColors = ['#00cccc', '#f08080', '#3990d2', '#d7b8ff', '#00e595', '#a1f65f', '#41e3e7', '#ff7400', '#fff68f', '#aaaaaa'];
+
+foreach ($dataQueryDb as $key => $value) {
+    $getNliaiEigen = querydb("SELECT a.id_node_0, a.nilai, d.kriteria FROM ahp_nilai_eigen a
+LEFT JOIN ahp_kriteria_seleksi c ON c.id_kriteria_seleksi = a.id_node_0
+LEFT JOIN ahp_kriteria d ON d.id_kriteria = c.id_kriteria
+WHERE tipe=1 AND a.id_node='$value[id_alternatif]' ORDER BY a.id_nilai_eigen ASC");
+
+    if ($key != 0) {
+        $yKeys[] = $key;
+    }
+
+    $i = 1;
+    $data[$key][] = $value['catatan'];
+    foreach ($getNliaiEigen as $value2) {
+        $data[$key][$i] = $value2['nilai'];
+        $label[$key][] = $value2['kriteria'];
+        $i++;
+    };
 }
 
 ?>
@@ -79,40 +117,22 @@ while ($d_hasil_rank = mysqli_fetch_array($hasil_rank)) {
         <!-- Style.css -->
         <link rel="stylesheet" type="text/css" href="assets/css/style.css">
         <link rel="stylesheet" type="text/css" href="assets/css/jquery.mCustomScrollbar.css">
+        <link rel="stylesheet" href="css/morris.css" type="text/css"/>
+        <style>
+            .table td, .table th, .table tr {
+                padding: 5px;
+                word-wrap: break-word;
+            }
+
+            .card .card-header {
+                padding-bottom: 0px;
+            }
+        </style>
     </head>
     <body>
-
-
         <div class="card" >
-            <div class="card-header"><h5>4-3. Hasil Seleksi Metode AHP</h5></div>
-            <form class="card-body" method="post" action="?h=hasil" enctype="multipart/form-data">
-                <div class="table-responsive">
-                    <table class="table" width="100%" border="0" cellspacing="0" cellpadding="4">
-                        <tr>
-                            <td width="13%" style="text-align:left;">Pilih Seleksi :</td>
-                            <td width="87%" style="text-align:left;">
-                                <select name="seleksi" onchange="this.form.submit()" style="font-size:16px; color:#333; padding-top:2px; width:auto;">
-                                    <option value="0"></option>
-                                    <?php
-                                    $q_seleksi = "SELECT id_seleksi, seleksi, tahun FROM ahp_seleksi ORDER BY tahun DESC, id_seleksi DESC";
-                                    $h_node = querydb($q_seleksi);
-                                    var_dump($seleksi);
-                                    while ($dseleksi = mysqli_fetch_array($h_node)) {
-
-                                        ?>
-                                        <option value="<?php echo $dseleksi['id_seleksi']; ?>" <?php
-                                        if ($dseleksi['id_seleksi'] == $seleksi) {
-                                            echo "selected";
-                                        }
-
-                                        ?>><?php echo $dseleksi['tahun'] . " - " . $dseleksi['seleksi']; ?></option>
-                                            <?php } ?>
-                                </select>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-            </form>
+            <div class="card-header"><h4>4-3. Hasil Seleksi Metode AHP</h4></div>
+            <div class="card-header"><h5>Tahun <?php echo $namaSeleksi ?></h5></div>
 
             <?php if (!empty($seleksi)) { ?>
                 <div class="card-body csstable">
@@ -208,13 +228,61 @@ while ($d_hasil_rank = mysqli_fetch_array($hasil_rank)) {
         </div>
 
         <?php if (!empty($seleksi)) { ?>
-            <div class="card">
+            <div class="card" style="page-break-before: always">
                 <div class="card-header"><h5>Grafik Nilai Eigen Kriteria dan Hasil</h5></div>
+                <div class="chart" id="line-chart"></div>
+                <!--                <div class="card-body">
+                                    <iframe style="width: 100%; height: 600px;" src="cetak_ahp_hasil_grafik.php?seleksi=<?php echo $seleksi ?>" frameborder="0" scrolling="auto"></iframe>
+                                </div>-->
+            </div>
+
+            <div class="card">
                 <div class="card-body">
-                    <iframe style="width: 100%; height: 400px;" src="grafik_1.php?seleksi=<?php echo $seleksi ?>" frameborder="0" scrolling="auto"></iframe>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                            <th>No</th>
+                            <th>Kriteria</th>
+                            <th>Warna</th>
+                            </thead>
+                            <tbody>
+                                <?php $no = 1; ?>
+                                <?php foreach ($kriteriaQuery as $key => $val) { ?>
+                                    <tr>
+                                        <td><?php echo $no ?></td>
+                                        <td><?php echo $kriteriaColors[$key][] = $val[0]; ?></td>
+                                        <td><div style="border: 2px solid <?php echo $kriteriaColors[$key][] = $lineColors[$key]; ?>"></div></td>
+                                    </tr>
+                                    <?php $no++; ?>
+                                <?php } ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
+
         <?php } ?>
 
     </body>
+    <script src="./js/jquery-1.10.2.min.js"></script>
+    <script src="./js/raphael-min.js"></script>
+    <script src="./js/morris.min.js"></script>
+    <script>
+        // LINE CHART
+        new Morris.Line({
+            element: 'line-chart',
+            data: <?php echo json_encode($data) ?>,
+            xkey: <?php echo $xKey ?>, // value x
+            ykeys: <?php echo json_encode($yKeys) ?>, // value y
+            labels: <?php echo json_encode($label[0]) ?>, // Label in popup info
+            lineColors: <?php echo json_encode($lineColors) ?>,
+            hideHover: true,
+            parseTime: false,
+            resize: true,
+            redraw: true
+        });
+
+        window.print();
+        window.close();
+    </script>
 </html>

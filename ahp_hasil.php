@@ -69,6 +69,9 @@ while ($d_hasil_rank = mysqli_fetch_array($hasil_rank)) {
     </form>
 
     <?php if (!empty($seleksi)) { ?>
+        <div class="card-block">
+            <a id="btn-cetak" href="cetak_ahp_hasil.php?seleksi=<?php echo $seleksi ?>" target="_blank"><div class="btn btn-success btn-sm btn-round">Cetak PDF</div></a>
+        </div>
         <div class="card-body csstable">
             <!--|&nbsp;-->
             <?php
@@ -165,7 +168,7 @@ while ($d_hasil_rank = mysqli_fetch_array($hasil_rank)) {
     <div class="card">
         <div class="card-header"><h5>Grafik Nilai Eigen Kriteria dan Hasil</h5></div>
         <div class="card-body">
-            <iframe style="width: 100%; height: 400px;" src="grafik_1.php?seleksi=<?php echo $seleksi ?>" frameborder="0" scrolling="auto"></iframe>
+            <iframe style="width: 100%; height: 400px;" src="ahp_hasil_grafik.php?seleksi=<?php echo $seleksi ?>" frameborder="0" scrolling="auto"></iframe>
         </div>
     </div>
 <?php } ?>

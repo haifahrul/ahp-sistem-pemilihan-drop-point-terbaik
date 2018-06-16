@@ -215,6 +215,7 @@ $h = antiinjec(@$_GET['h']);
                     background-color:#0066CC;
                     color: #0066CC;
                     border:1px solid #06C;
+                    font-weight: bold;
                 }
             }
         </style>
@@ -233,7 +234,7 @@ $h = antiinjec(@$_GET['h']);
 
                     ?>
 
-                    <h4>Seleksi: <?php echo $h_node['2'] . ' - ' . $h_node['1'] ?></h4>
+                    <h5>Tahun <?php echo $h_node['2'] . ' - ' . $h_node['1'] ?></h5>
                     <input type="hidden" name="status" value="save" />
                     <input type="hidden" name="seleksi" value="<?php echo $seleksi ?>" />
                     <input type="hidden" name="alternatif" value="<?php echo!empty($alternatif) ? $alternatif : null; ?>" />

@@ -176,6 +176,7 @@ if (!empty($seleksi) && !empty($kriteria)) {
                         background-color:#0066CC;
                         color: #0066CC;
                         border:1px solid #06C;
+                        font-weight: bold;
                     }
 
                     input[type=input] {
