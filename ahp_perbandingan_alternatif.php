@@ -17,7 +17,7 @@ if (!empty($seleksi)) {
     $dataAlternatif = querydb($dataAlternatifQuery);
     $dataAlternatifCount = $dataAlternatif->num_rows;
 
-    $getAlternatifQuery = $q_seleksi = "SELECT aa.id_seleksi, ak.id_kriteria, aa.id_alternatif, ak.value, aa.nama_alternatif FROM ahp_alternatif aa LEFT JOIN ahp_kandidat ak ON ak.id_alternatif = aa.id_alternatif WHERE aa.id_seleksi = " . $seleksi;
+    $getAlternatifQuery = $q_seleksi = "SELECT aa.id_seleksi, ak.id_kriteria, aa.id_alternatif, ak.value, aa.nama_alternatif FROM ahp_alternatif aa LEFT JOIN ahp_kandidat ak ON ak.id_alternatif = aa.id_alternatif WHERE aa.id_seleksi = " . $seleksi . " ORDER BY ak.id ASC";
     $getAlternatif = querydb($getAlternatifQuery);
     $getAlternatifCount = $getAlternatif->num_rows;
 
@@ -70,7 +70,7 @@ if (!empty($seleksi)) {
                         $valueInputAlternatifKriteria = $valueIdAlternatifInput . '-' . $valueIdKriteriaInput;
                         $valueInput = !empty($dataPost[$valueInputAlternatifKriteria]) ? $dataPost[$valueInputAlternatifKriteria] : 0;
 
-                        $q_sql_cek_kandidatInputQuery = "SELECT * FROM ahp_kandidat WHERE id_seleksi='$seleksi' AND id_kriteria='$valueIdKriteriaInput' AND id_alternatif='$valueIdAlternatifInput'";
+                        $q_sql_cek_kandidatInputQuery = "SELECT * FROM ahp_kandidat WHERE id_seleksi='$seleksi' AND id_kriteria='$valueIdKriteriaInput' AND id_alternatif='$valueIdAlternatifInput' ORDER BY id";
                         $q_sql_cek_kandidatInputQueryDb = querydb($q_sql_cek_kandidatInputQuery);
                         $q_sql_cek_kandidatInput = mysqli_fetch_row($q_sql_cek_kandidatInputQueryDb);
 
@@ -200,10 +200,13 @@ if (!empty($seleksi)) {
 
                     $max -= $selisih;
                 }
+//                foreach ($skala as $vardump) {
+//                    var_dump('Skala: ' . $vardump[0] . ' - Data: ' . $vardump[1]);
+//                }
                 /* END HITUNG SKALA DATA */
 
                 /* HITUNG PERBANDINGAN */
-//                var_dump($alternatifIdPasangan);
+                // var_dump($alternatifIdPasangan);
                 $jml_matrix = count($alternatifIdPasangan);
                 for ($i = 0; $i < $jml_matrix; $i++) {
                     $id_pasang = $alternatifIdPasangan[$i]['id_nilai_pasangan'];
@@ -212,32 +215,33 @@ if (!empty($seleksi)) {
                     $nilai_2 = 0;
 
                     foreach ($skala as $key => $val) {
-                        if ((float) $nilai >= (float) $val[1]) {
-//                            var_dump($key . ': ' . $nilai . ' >= ' . $val[1]);
+//                        echo $key;
+//                        var_dump('Skala: ' . $val[1]);
+                        if ((float) $nilai >= (float) $val[1] && (float) $val[1] <= (float) $nilai) {
                             if ($key == 0) {
-                                $nilai_1 = $val[0];
-                                $nilai_2 = 9;
+                                $nilai_1 = 9;
+                                $nilai_2 = 1 / 9;
                             } elseif ($key == 1) {
-                                $nilai_1 = $val[0];
-                                $nilai_2 = 8;
+                                $nilai_1 = 8;
+                                $nilai_2 = 1 / 8;
                             } elseif ($key == 2) {
-                                $nilai_1 = $val[0];
-                                $nilai_2 = 7;
+                                $nilai_1 = 7;
+                                $nilai_2 = 1 / 7;
                             } elseif ($key == 3) {
-                                $nilai_1 = $val[0];
-                                $nilai_2 = 6;
+                                $nilai_1 = 6;
+                                $nilai_2 = 1 / 6;
                             } elseif ($key == 4) {
-                                $nilai_1 = $val[0];
-                                $nilai_2 = 5;
+                                $nilai_1 = 5;
+                                $nilai_2 = 1 / 5;
                             } elseif ($key == 5) {
-                                $nilai_1 = $val[0];
-                                $nilai_2 = 4;
+                                $nilai_1 = 4;
+                                $nilai_2 = 1 / 4;
                             } elseif ($key == 6) {
-                                $nilai_1 = $val[0];
-                                $nilai_2 = 3;
+                                $nilai_1 = 3;
+                                $nilai_2 = 1 / 3;
                             } elseif ($key == 7) {
-                                $nilai_1 = $val[0];
-                                $nilai_2 = 2;
+                                $nilai_1 = 2;
+                                $nilai_2 = 1 / 2;
                             } elseif ($key == 8) {
                                 if ((float) $nilai == 0) {
                                     $nilai_1 = 1;
@@ -247,37 +251,39 @@ if (!empty($seleksi)) {
                                     $nilai_2 = 1 / 2;
                                 }
                             } elseif ($key == 9) {
-                                $nilai_1 = $val[0];
+                                $nilai_1 = 1 / 2;
                                 $nilai_2 = 2;
                             } elseif ($key == 10) {
-                                $nilai_1 = $val[0];
+                                $nilai_1 = 1 / 3;
                                 $nilai_2 = 3;
                             } elseif ($key == 11) {
-                                $nilai_1 = $val[0];
+                                $nilai_1 = 1 / 4;
                                 $nilai_2 = 4;
                             } elseif ($key == 12) {
-                                $nilai_1 = $val[0];
+                                $nilai_1 = 1 / 5;
                                 $nilai_2 = 5;
                             } elseif ($key == 13) {
-                                $nilai_1 = $val[0];
+                                $nilai_1 = 1 / 6;
                                 $nilai_2 = 6;
                             } elseif ($key == 14) {
-                                $nilai_1 = $val[0];
+                                $nilai_1 = 1 / 7;
                                 $nilai_2 = 7;
                             } elseif ($key == 15) {
-                                $nilai_1 = $val[0];
+                                $nilai_1 = 1 / 8;
                                 $nilai_2 = 8;
                             } elseif ($key == 16) {
-                                $nilai_1 = $val[0];
+                                $nilai_1 = 1 / 9;
                                 $nilai_2 = 9;
                             }
 
+                            $nilai_1 = number_format($nilai_1, 2);
+                            $nilai_2 = number_format($nilai_2, 2);
+//                            var_dump('Nilai ' . $nilai . ' >= Perbandingan ' . $val[1] . ' -> Nilai 1 = ' . $nilai_1 . ' - Nilai 2 = ' . $nilai_2);
                             break;
                         }
                     }
 
-                    $nilai_1 = number_format($nilai_1, 2);
-                    $nilai_2 = number_format($nilai_2, 2);
+
 
                     $query = "UPDATE ahp_nilai_pasangan SET nilai_1='$nilai_1', nilai_2='$nilai_2' WHERE id_nilai_pasangan='$id_pasang'";
                     querydb($query);
